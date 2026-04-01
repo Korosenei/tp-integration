@@ -1,0 +1,23 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+
+  # Prometheus se scrape lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # cAdvisor — métriques des conteneurs Docker
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: /metrics
+
+  # GLPI — health check HTTP (métriques basiques)
+  - job_name: 'glpi'
+    static_configs:
+      - targets: ['glpi:80']
+    metrics_path: /
+    scheme: http

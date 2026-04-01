@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  # --- MariaDB : données GLPI (tickets, équipements, utilisateurs) ---
+  - name: GLPI-MariaDB
+    type: mysql
+    url: mariadb:3306
+    database: glpi
+    user: ${MYSQL_USER}
+    secureJsonData:
+      password: ${MYSQL_PASSWORD}
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 10
+      connMaxLifetime: 14400
+    isDefault: true
+    editable: true

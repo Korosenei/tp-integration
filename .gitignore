@@ -1,0 +1,20 @@
+# Secrets — ne jamais commiter
+.env
+
+# Données Docker locales
+volumes/
+data/
+
+# Éditeurs
+.vscode/
+*.swp
+*~
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

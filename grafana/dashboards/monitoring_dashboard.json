@@ -1,0 +1,309 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "description": "Monitoring infrastructure — CPU, Mémoire, Réseau, Statut conteneurs (cAdvisor + Prometheus)",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+
+    {
+      "id": 1,
+      "title": "🖥️ Statut & Vue d'ensemble",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+
+    {
+      "id": 2,
+      "title": "Conteneurs actifs",
+      "description": "Nombre de conteneurs nommés actuellement en cours d'exécution",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "count(container_last_seen{name!=\"\"})",
+        "instant": true,
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 3,
+      "title": "CPU total (tous conteneurs)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "sum(rate(container_cpu_usage_seconds_total{name!=\"\"}[5m])) * 100",
+        "instant": true,
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 4,
+      "title": "Mémoire totale utilisée",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decmbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1024 },
+              { "color": "red", "value": 2048 }
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "sum(container_memory_usage_bytes{name!=\"\"}) / 1024 / 1024",
+        "instant": true,
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 5,
+      "title": "Uptime Prometheus",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "time() - process_start_time_seconds{job=\"prometheus\"}",
+        "instant": true,
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 10,
+      "title": "🔥 CPU par conteneur",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }
+    },
+
+    {
+      "id": 6,
+      "title": "Panel A — Utilisation CPU par conteneur (%)",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max", "last"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "drawStyle": "line" },
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "rate(container_cpu_usage_seconds_total{name!=\"\"}[5m]) * 100",
+        "legendFormat": "{{ name }}",
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 11,
+      "title": "💾 Mémoire par conteneur",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 }
+    },
+
+    {
+      "id": 7,
+      "title": "Panel B — Mémoire utilisée par conteneur (MiB)",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max", "last"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decmbytes",
+          "custom": { "lineWidth": 2, "fillOpacity": 15, "drawStyle": "line" },
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "container_memory_usage_bytes{name!=\"\"} / 1024 / 1024",
+        "legendFormat": "{{ name }}",
+        "refId": "A"
+      }]
+    },
+
+    {
+      "id": 12,
+      "title": "🌐 Réseau par conteneur",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 }
+    },
+
+    {
+      "id": 8,
+      "title": "Panel C — Trafic réseau entrant/sortant (octets/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 26 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "drawStyle": "line" },
+          "color": { "mode": "palette-classic" }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+          "expr": "rate(container_network_receive_bytes_total{name!=\"\"}[5m])",
+          "legendFormat": "IN — {{ name }}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+          "expr": "rate(container_network_transmit_bytes_total{name!=\"\"}[5m])",
+          "legendFormat": "OUT — {{ name }}",
+          "refId": "B"
+        }
+      ]
+    },
+
+    {
+      "id": 13,
+      "title": "📦 Statut des conteneurs",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 }
+    },
+
+    {
+      "id": 9,
+      "title": "Panel D — Statut des conteneurs (last seen)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 36 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "name",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "green" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+        "expr": "container_last_seen{name!=\"\"}",
+        "legendFormat": "{{ name }}",
+        "instant": true,
+        "refId": "A"
+      }]
+    }
+
+  ],
+
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "tags": ["monitoring", "docker", "cadvisor", "prometheus", "ibam"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Monitoring Infrastructure — Docker & cAdvisor",
+  "uid": "monitoring-docker-ibam",
+  "version": 1
+}
