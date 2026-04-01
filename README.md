@@ -60,7 +60,7 @@ Ce projet déploie une stack complète d'intégration logicielle conteneurisée 
 ### Étape 1 — Cloner le dépôt
 
 ```bash
-git clone https://github.com/Korosenei/tp-integration.git
+git clone https://github.com/<votre-compte>/tp-integration.git
 cd tp-integration
 ```
 
@@ -197,25 +197,27 @@ rate(container_cpu_usage_seconds_total{name!=""}[5m])
 
 ```
 tp-integration/
-├── docker-compose.yml          # Orchestration complète de la stack
-├── .env                        # Variables d'environnement (non committé)
-├── .env.example                # Modèle de configuration
-├── .gitignore                  # Fichiers exclus du dépôt
-├── README.md                   # Documentation (ce fichier)
+├── docker-compose.yml                  # Orchestration complète de la stack (6 services)
+├── .env                                # Variables d'environnement (non committé)
+├── .env.example                        # Modèle de configuration à copier
+├── .gitignore                          # Fichiers exclus du dépôt Git
+├── README.md                           # Documentation (ce fichier)
+├── glpi/
+│   └── config_db.php                   # Préconfiguration connexion GLPI → MariaDB
 ├── prometheus/
-│   └── prometheus.yml          # Configuration des scrapers Prometheus
+│   └── prometheus.yml                  # Configuration des scrapers Prometheus
 ├── grafana/
 │   ├── provisioning/
 │   │   ├── datasources/
-│   │   │   ├── mariadb.yml     # Datasource GLPI (MariaDB)
-│   │   │   └── prometheus.yml  # Datasource Prometheus
+│   │   │   ├── mariadb.yml             # Datasource GLPI-MariaDB (provisioning auto)
+│   │   │   └── prometheus.yml          # Datasource Prometheus (provisioning auto)
 │   │   └── dashboards/
-│   │       └── dashboards.yml  # Provisioning automatique des dashboards
+│   │       └── dashboards.yml          # Provisioning automatique des dashboards
 │   └── dashboards/
-│       ├── glpi_dashboard.json         # Dashboard GLPI (6 panels)
-│       └── monitoring_dashboard.json   # Dashboard monitoring (4 panels)
+│       ├── glpi_dashboard.json         # Dashboard GLPI ITSM (6 panels)
+│       └── monitoring_dashboard.json   # Dashboard monitoring Docker/cAdvisor (4 panels)
 └── analyse/
-    └── analyse_bdd_glpi.md     # Analyse SQL de la BDD GLPI (Partie 2)
+    └── analyse_bdd_glpi.md             # Analyse SQL de la BDD GLPI (Partie 2, Q1→Q5)
 ```
 
 ---
