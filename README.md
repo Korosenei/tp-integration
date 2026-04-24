@@ -3,9 +3,9 @@
 **Enseignant : Charles BATIONO**
 
 > **Groupe 6 :**
+> - COULIBALY Abdoul Rachid
 > - KOURAOGO W Joel Faïsal
 > - PARE Kontama Léandre Bénilde
-> - COULIBALY Abdoul Rachid
 >
 > *Master 2 ISIE — IBAM / UJKZ — Ouagadougou, Burkina Faso — 2025-2026*
 
@@ -98,44 +98,76 @@ docker compose logs -f glpi
 
 Attendre le message indiquant que GLPI est prêt avant de continuer.
 
-### Étape 6 — Accéder aux interfaces
-
-Voir la section **URLs d'accès** ci-dessous.
-
+### Étape 6 — Wizard d'installation GLPI (première fois uniquement)
+ 
+Ouvrir **http://localhost:8080** et suivre le wizard :
+1. Sélectionner **Français** → Valider
+2. Accepter la licence → **Installer**
+3. Vérification des prérequis → Continuer
+4. Connexion BDD :
+   - Serveur SQL : `mariadb`
+   - Utilisateur : `glpi_user`
+   - Mot de passe : `glpi_pass_2024`
+5. Sélectionner la base `glpi` → Continuer jusqu'à la fin
+### Étape 7 — Injecter des données de test GLPI
+ 
+```bash
+docker exec -it mariadb mysql -u glpi_user -pglpi_pass_2024 glpi -e "
+INSERT INTO glpi_tickets (name, content, status, priority, urgency, impact, date_creation, date_mod, entities_id, is_deleted, itilcategories_id) VALUES
+('Problème réseau bureau 3', 'Réseau inaccessible', 1, 4, 3, 3, NOW(), NOW(), 1, 0, 0),
+('PC ne démarre plus', 'Bloqué au démarrage', 2, 5, 4, 4, NOW() - INTERVAL 1 DAY, NOW(), 1, 0, 0),
+('Mise à jour Windows bloquée', 'Erreur 0x80070005', 4, 3, 2, 2, NOW() - INTERVAL 2 DAY, NOW(), 1, 0, 0),
+('Imprimante hors service', 'HP ne répond plus', 5, 2, 2, 2, NOW() - INTERVAL 5 DAY, NOW(), 1, 0, 0),
+('Accès VPN impossible', 'Connexion échoue', 6, 4, 3, 3, NOW() - INTERVAL 10 DAY, NOW(), 1, 0, 0),
+('Écran noir après veille', 'Ne se rallume pas', 1, 3, 2, 2, NOW() - INTERVAL 3 DAY, NOW(), 1, 0, 0),
+('Outlook bloqué', 'Ne se synchronise plus', 2, 4, 3, 3, NOW() - INTERVAL 4 DAY, NOW(), 1, 0, 0),
+('Mot de passe oublié', 'Réinitialisation requise', 5, 1, 1, 1, NOW() - INTERVAL 7 DAY, NOW(), 1, 0, 0),
+('Antivirus expiré', 'Licence à renouveler', 3, 3, 2, 2, NOW() - INTERVAL 15 DAY, NOW(), 1, 0, 0),
+('Disque dur plein', 'Espace critique serveur', 2, 5, 5, 5, NOW() - INTERVAL 1 DAY, NOW(), 1, 0, 0);"
+```
+ 
+### Étape 8 — Accéder à Grafana
+ 
+Ouvrir **http://localhost:3000** → `admin` / `Admin@IBAM2024`
+ 
+> Si connexion refusée : `docker exec -it grafana grafana-cli admin reset-admin-password Admin@IBAM2024`
+ 
+Les 2 dashboards sont provisionnés automatiquement dans **Dashboards → GLPI**.
+ 
 ---
-
+ 
 ## 🌐 URLs d'accès aux services
-
+ 
 | Service | URL | Description |
 |---|---|---|
-| **GLPI** | http://localhost:8080 | Interface de gestion ITSM |
+| **GLPI** | http://localhost:8080 | Interface ITSM |
 | **Grafana** | http://localhost:3000 | Tableaux de bord |
-| **Prometheus** | http://localhost:9090 | Interface de métriques |
-| **cAdvisor** | http://localhost:8081 | Métriques brutes des conteneurs |
+| **Prometheus** | http://localhost:9090 | Métriques & PromQL |
 | **Prometheus Targets** | http://localhost:9090/targets | Statut des scrapers |
-
+| **cAdvisor** | http://localhost:8081 | Métriques brutes conteneurs |
+ 
 ---
-
+ 
 ## 🔑 Identifiants par défaut
-
+ 
 ### GLPI
-Après la première installation via le wizard (http://localhost:8080) :
-
-| Identifiant | Valeur |
+ 
+| Champ | Valeur |
 |---|---|
 | Login | `glpi` |
 | Mot de passe | `glpi` |
-
-> **Note :** GLPI demande un wizard de configuration au premier lancement. Sélectionner MariaDB comme type de base, hôte `mariadb`, base `glpi`, utilisateur `glpi_user`.
-
+ 
+> Changer le mot de passe après la première connexion (recommandé par GLPI).
+ 
 ### Grafana
-
-| Identifiant | Valeur (configurée dans `.env`) |
+ 
+| Champ | Valeur |
 |---|---|
 | Login | `admin` |
 | Mot de passe | `Admin@IBAM2024` |
-
+ 
 ---
+
 
 ## 🛑 Arrêt et nettoyage
 
