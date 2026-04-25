@@ -111,7 +111,7 @@ prometheus   running
 grafana      running
 ```
  
-### Étape 5 - Wizard d'installation GLPI (première fois uniquement)
+### Étape 5 — Wizard d'installation GLPI (première fois uniquement)
  
 Ouvrir **http://localhost:8080** et suivre le wizard :
  
@@ -127,6 +127,7 @@ Ouvrir **http://localhost:8080** et suivre le wizard :
  
 5. Sélectionner la base `glpi` → Continuer jusqu'à la fin
 6. Se connecter avec `glpi` / `glpi`
+
 ### Étape 6 - Injecter les données de démonstration
  
 Après le wizard, exécuter le script de seed :
