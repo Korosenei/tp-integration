@@ -119,6 +119,7 @@ Ouvrir **http://localhost:8080** et suivre le wizard :
 2. Accepter la licence → **Installer**
 3. Vérification des prérequis → Continuer
 4. **Connexion à la base de données :**
+
 | Champ | Valeur |
 |---|---|
 | Serveur SQL | `mariadb` |
