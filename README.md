@@ -1,5 +1,5 @@
-# TP Final — Intégration Logicielle
-**Module : Intégration Logicielle M2 ISIE — IBAM / UJKZ**
+# TP Final - Intégration Logicielle
+**Module : Intégration Logicielle M2 ISIE - IBAM / UJKZ**
 **Enseignant : Charles BATIONO**
 
 > **Groupe 6 :**
@@ -7,40 +7,45 @@
 > - KOURAOGO W Joel Faïsal
 > - PARE Kontama Léandre Bénilde
 >
-> *Master 2 ISIE — IBAM / UJKZ — Ouagadougou, Burkina Faso — 2025-2026*
+> *Master 2 ISIE - IBAM / UJKZ - Ouagadougou, Burkina Faso - 2025-2026*
 
 ---
 
-## 📐 Architecture déployée
-
-Ce projet déploie une stack complète d'intégration logicielle conteneurisée via Docker Compose :
-
+## 📐 Présentation du projet
+ 
+Ce projet déploie une infrastructure complète d'intégration logicielle entièrement conteneurisée via Docker Compose, déployable en une seule commande. Il intègre un système ITSM (GLPI), deux bases de données relationnelles (MariaDB et PostgreSQL), un système de monitoring temps réel (Prometheus + cAdvisor) et un outil de visualisation de données (Grafana).
+ 
+### Architecture
+ 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        glpi_network                             │
-│                                                                 │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
-│  │  MariaDB │◄───│   GLPI   │    │PostgreSQL│                  │
-│  │  :3306   │    │  :8080   │    │  :5432   │                  │
-│  └──────────┘    └──────────┘    └──────────┘                  │
-│                                        ▲                        │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
-│  │cAdvisor  │───►│Prometheus│───►│ Grafana  │                  │
-│  │  :8081   │    │  :9090   │    │  :3000   │                  │
-│  └──────────┘    └──────────┘    └──────────┘                  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                         glpi_network                             │
+│                                                                  │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────┐               │
+│  │  MariaDB │◄───│     GLPI     │    │PostgreSQL│               │
+│  │  :3306   │    │    :8080     │    │  :5432   │               │
+│  └──────────┘    └──────────────┘    └──────────┘               │
+│                                            ▲                     │
+│  ┌──────────┐    ┌──────────┐    ┌──────────────┐               │
+│  │cAdvisor  │───►│Prometheus│───►│   Grafana    │               │
+│  │  :8081   │    │  :9090   │    │    :3000     │               │
+│  └──────────┘    └──────────┘    └──────────────┘               │
+└──────────────────────────────────────────────────────────────────┘
 ```
-
-| Service | Rôle |
-|---|---|
-| **MariaDB** | Base de données de GLPI (tickets, utilisateurs, inventaire) |
-| **GLPI** | Système ITSM de gestion de parc informatique |
-| **PostgreSQL** | Base relationnelle disponible comme datasource Grafana secondaire |
-| **cAdvisor** | Collecte les métriques des conteneurs Docker en temps réel |
-| **Prometheus** | Agrège et stocke les métriques de cAdvisor |
-| **Grafana** | Visualise les données GLPI (MariaDB) et les métriques (Prometheus) |
-
+ 
+### Services déployés
+ 
+| Service | Image | Rôle |
+|---|---|---|
+| **MariaDB** | `mariadb:10.11` | Base de données principale de GLPI |
+| **PostgreSQL** | `postgres:15` | Base relationnelle secondaire (datasource Grafana) |
+| **GLPI** | `diouxx/glpi` | Système ITSM de gestion de parc informatique |
+| **cAdvisor** | `gcr.io/cadvisor/cadvisor:latest` | Collecte des métriques des conteneurs Docker |
+| **Prometheus** | `prom/prometheus:latest` | Agrégation et stockage des métriques |
+| **Grafana** | `grafana/grafana:latest` | Tableaux de bord et visualisation |
+ 
 ---
+
 
 ## ✅ Prérequis
 
@@ -49,90 +54,116 @@ Ce projet déploie une stack complète d'intégration logicielle conteneurisée 
 | Docker Desktop | 24.x | `docker --version` |
 | Docker Compose | 2.x (inclus dans Docker Desktop) | `docker compose version` |
 | RAM disponible | **4 Go minimum** (8 Go recommandé) | Gestionnaire des tâches Windows |
-| OS testé | Windows 11 avec WSL2 activé | — |
+| OS testé | Windows 11 avec WSL2 activé | - |
 
 > **Important :** Activer WSL2 dans Docker Desktop (Settings → General → Use WSL2 based engine).
 
 ---
 
 ## 🚀 Instructions de démarrage
-
-### Étape 1 — Cloner le dépôt
-
+ 
+### Étape 1 - Cloner le dépôt
+ 
 ```bash
-git clone https://github.com/<votre-compte>/tp-integration.git
+git clone https://github.com/Korosenei/tp-integration.git
 cd tp-integration
 ```
-
-### Étape 2 — Créer le fichier de configuration
-
+ 
+### Étape 2 - Configurer les variables d'environnement
+ 
 ```bash
-# Copier le modèle
+# Windows
 copy .env.example .env
-
-# Ouvrir dans VS Code pour adapter les mots de passe
-code .env
+ 
+# Linux / Mac
+cp .env.example .env
 ```
-
-### Étape 3 — Lancer la stack
-
+ 
+Ouvrir `.env` et adapter les mots de passe si nécessaire (les valeurs par défaut fonctionnent telles quelles pour un test local).
+ 
+### Étape 3 - Lancer toute la stack
+ 
 ```bash
 docker compose up -d
 ```
-
-Le premier démarrage télécharge les images (~2 Go). Prévoir 3-5 minutes.
-
-### Étape 4 — Vérifier que tous les services sont UP
-
-```bash
-docker compose ps
-```
-
-Tous les services doivent afficher `running` ou `healthy`.
-
-### Étape 5 — Suivre les logs GLPI (initialisation BDD ~1-2 min)
-
+ 
+Premier lancement : ~3-5 minutes (téléchargement des images ~2 Go). Suivre la progression :
+ 
 ```bash
 docker compose logs -f glpi
 ```
-
-Attendre le message indiquant que GLPI est prêt avant de continuer.
-
-### Étape 6 — Wizard d'installation GLPI (première fois uniquement)
+ 
+### Étape 4 - Vérifier l'état des services
+ 
+```bash
+docker compose ps
+```
+ 
+Les 6 services doivent afficher `running` ou `healthy` :
+ 
+```
+NAME         STATUS
+mariadb      healthy
+postgres     healthy
+glpi         running
+cadvisor     running
+prometheus   running
+grafana      running
+```
+ 
+### Étape 5 - Wizard d'installation GLPI (première fois uniquement)
  
 Ouvrir **http://localhost:8080** et suivre le wizard :
-1. Sélectionner **Français** → Valider
+ 
+1. Langue : **Français** → Valider
 2. Accepter la licence → **Installer**
 3. Vérification des prérequis → Continuer
-4. Connexion BDD :
-   - Serveur SQL : `mariadb`
-   - Utilisateur : `glpi_user`
-   - Mot de passe : `glpi_pass_2024`
+4. **Connexion à la base de données :**
+| Champ | Valeur |
+|---|---|
+| Serveur SQL | `mariadb` |
+| Utilisateur SQL | `glpi_user` |
+| Mot de passe SQL | `glpi_pass_2024` |
+ 
 5. Sélectionner la base `glpi` → Continuer jusqu'à la fin
-### Étape 7 — Injecter des données de test GLPI
+6. Se connecter avec `glpi` / `glpi`
+### Étape 6 - Injecter les données de démonstration
+ 
+Après le wizard, exécuter le script de seed :
+ 
+```bash
+# Linux / Mac
+bash seed-data.sh
+ 
+# Windows PowerShell
+Get-Content mariadb\init.sql | docker exec -i mariadb mysql -u glpi_user -pglpi_pass_2024 glpi
+```
+ 
+ 
+Vérification :
  
 ```bash
 docker exec -it mariadb mysql -u glpi_user -pglpi_pass_2024 glpi -e "
-INSERT INTO glpi_tickets (name, content, status, priority, urgency, impact, date_creation, date_mod, entities_id, is_deleted, itilcategories_id) VALUES
-('Problème réseau bureau 3', 'Réseau inaccessible', 1, 4, 3, 3, NOW(), NOW(), 1, 0, 0),
-('PC ne démarre plus', 'Bloqué au démarrage', 2, 5, 4, 4, NOW() - INTERVAL 1 DAY, NOW(), 1, 0, 0),
-('Mise à jour Windows bloquée', 'Erreur 0x80070005', 4, 3, 2, 2, NOW() - INTERVAL 2 DAY, NOW(), 1, 0, 0),
-('Imprimante hors service', 'HP ne répond plus', 5, 2, 2, 2, NOW() - INTERVAL 5 DAY, NOW(), 1, 0, 0),
-('Accès VPN impossible', 'Connexion échoue', 6, 4, 3, 3, NOW() - INTERVAL 10 DAY, NOW(), 1, 0, 0),
-('Écran noir après veille', 'Ne se rallume pas', 1, 3, 2, 2, NOW() - INTERVAL 3 DAY, NOW(), 1, 0, 0),
-('Outlook bloqué', 'Ne se synchronise plus', 2, 4, 3, 3, NOW() - INTERVAL 4 DAY, NOW(), 1, 0, 0),
-('Mot de passe oublié', 'Réinitialisation requise', 5, 1, 1, 1, NOW() - INTERVAL 7 DAY, NOW(), 1, 0, 0),
-('Antivirus expiré', 'Licence à renouveler', 3, 3, 2, 2, NOW() - INTERVAL 15 DAY, NOW(), 1, 0, 0),
-('Disque dur plein', 'Espace critique serveur', 2, 5, 5, 5, NOW() - INTERVAL 1 DAY, NOW(), 1, 0, 0);"
+SELECT 'Tickets'       , COUNT(*) FROM glpi_tickets          WHERE is_deleted=0
+UNION ALL
+SELECT 'Ordinateurs'   , COUNT(*) FROM glpi_computers         WHERE is_deleted=0
+UNION ALL
+SELECT 'Périphériques' , COUNT(*) FROM glpi_peripherals       WHERE is_deleted=0
+UNION ALL
+SELECT 'Réseau'        , COUNT(*) FROM glpi_networkequipments WHERE is_deleted=0
+UNION ALL
+SELECT 'Imprimantes'   , COUNT(*) FROM glpi_printers          WHERE is_deleted=0
+UNION ALL
+SELECT 'Téléphones'    , COUNT(*) FROM glpi_phones            WHERE is_deleted=0;"
 ```
  
-### Étape 8 — Accéder à Grafana
+### Étape 7 - Accéder à Grafana
  
 Ouvrir **http://localhost:3000** → `admin` / `Admin@IBAM2024`
  
-> Si connexion refusée : `docker exec -it grafana grafana-cli admin reset-admin-password Admin@IBAM2024`
+> Si la connexion échoue : `docker exec -it grafana grafana-cli admin reset-admin-password Admin@IBAM2024`
  
-Les 2 dashboards sont provisionnés automatiquement dans **Dashboards → GLPI**.
+Les 2 dashboards sont provisionnés automatiquement dans **Dashboards**.
  
 ---
  
@@ -140,11 +171,11 @@ Les 2 dashboards sont provisionnés automatiquement dans **Dashboards → GLPI**
  
 | Service | URL | Description |
 |---|---|---|
-| **GLPI** | http://localhost:8080 | Interface ITSM |
+| **GLPI** | http://localhost:8080 | Interface ITSM de gestion de parc |
 | **Grafana** | http://localhost:3000 | Tableaux de bord |
-| **Prometheus** | http://localhost:9090 | Métriques & PromQL |
+| **Prometheus** | http://localhost:9090 | Interface métriques & PromQL |
 | **Prometheus Targets** | http://localhost:9090/targets | Statut des scrapers |
-| **cAdvisor** | http://localhost:8081 | Métriques brutes conteneurs |
+| **cAdvisor** | http://localhost:8081 | Métriques brutes des conteneurs |
  
 ---
  
@@ -157,7 +188,7 @@ Les 2 dashboards sont provisionnés automatiquement dans **Dashboards → GLPI**
 | Login | `glpi` |
 | Mot de passe | `glpi` |
  
-> Changer le mot de passe après la première connexion (recommandé par GLPI).
+> GLPI recommande de changer les mots de passe des comptes par défaut (`glpi`, `tech`, `normal`, `post-only`) après la première connexion.
  
 ### Grafana
  
@@ -167,31 +198,26 @@ Les 2 dashboards sont provisionnés automatiquement dans **Dashboards → GLPI**
 | Mot de passe | `Admin@IBAM2024` |
  
 ---
-
-
+ 
 ## 🛑 Arrêt et nettoyage
-
-### Arrêter la stack (données conservées)
-
+ 
 ```bash
+# Arrêter la stack (volumes et données conservés)
 docker compose down
-```
-
-### Arrêter et supprimer tous les volumes (reset complet)
-
-```bash
+ 
+# Arrêter et supprimer tous les volumes (reset complet)
 docker compose down -v
-```
-
-### Supprimer également les images téléchargées
-
-```bash
+ 
+# Supprimer aussi les images téléchargées
 docker compose down -v --rmi all
 ```
-
+ 
+> Après un `docker compose down -v`, relancer le wizard GLPI et le script `seed-data.sh` pour réinitialiser les données.
+ 
 ---
 
-## 📊 Partie 4 — Réponses aux questions PromQL
+
+## 📊 Partie 4 - Réponses aux questions PromQL
 
 ### Targets Prometheus configurés
 
@@ -201,13 +227,13 @@ Accéder à http://localhost:9090/targets pour voir le statut en temps réel.
 |---|---|---|
 | `prometheus` | `localhost:9090` | ✅ UP |
 | `cadvisor` | `cadvisor:8080` | ✅ UP |
-| `glpi` | `glpi:80` | ⚠️ DOWN (GLPI n'expose pas de endpoint `/metrics` natif — normal) |
+| `glpi` | `glpi:80` | ⚠️ DOWN (GLPI n'expose pas de endpoint `/metrics` natif - normal) |
 
 ### Différence entre `scrape_interval` et `evaluation_interval`
 
-- **`scrape_interval: 15s`** — Fréquence à laquelle Prometheus interroge (scrape) chaque target pour collecter de nouvelles métriques. C'est la granularité des données brutes.
+- **`scrape_interval: 15s`** - Fréquence à laquelle Prometheus interroge (scrape) chaque target pour collecter de nouvelles métriques. C'est la granularité des données brutes.
 
-- **`evaluation_interval: 15s`** — Fréquence à laquelle Prometheus évalue les règles d'alerte et les recording rules définies dans sa configuration. Ces deux valeurs sont indépendantes, bien qu'ici fixées à la même valeur pour la cohérence.
+- **`evaluation_interval: 15s`** - Fréquence à laquelle Prometheus évalue les règles d'alerte et les recording rules définies dans sa configuration. Ces deux valeurs sont indépendantes, bien qu'ici fixées à la même valeur pour la cohérence.
 
 ### Explication de la requête PromQL
 
@@ -216,41 +242,46 @@ rate(container_cpu_usage_seconds_total{name!=""}[5m])
 ```
 
 **Décomposition :**
-- `container_cpu_usage_seconds_total` — Métrique cAdvisor comptant le temps CPU cumulé (en secondes) consommé par chaque conteneur depuis son démarrage. C'est un compteur monotone croissant.
-- `{name!=""}` — Filtre pour n'afficher que les conteneurs ayant un nom (exclut les processus système sans nom).
-- `[5m]` — Fenêtre temporelle de 5 minutes pour le calcul du taux.
-- `rate(...)` — Calcule le taux d'accroissement par seconde sur la fenêtre de 5 minutes. Le résultat représente le **pourcentage de CPU utilisé** (une valeur de `0.5` = 50% d'un cœur).
+- `container_cpu_usage_seconds_total` - Métrique cAdvisor comptant le temps CPU cumulé (en secondes) consommé par chaque conteneur depuis son démarrage. C'est un compteur monotone croissant.
+- `{name!=""}` - Filtre pour n'afficher que les conteneurs ayant un nom (exclut les processus système sans nom).
+- `[5m]` - Fenêtre temporelle de 5 minutes pour le calcul du taux.
+- `rate(...)` - Calcule le taux d'accroissement par seconde sur la fenêtre de 5 minutes. Le résultat représente le **pourcentage de CPU utilisé** (une valeur de `0.5` = 50% d'un cœur).
 
 **Interprétation :** Cette requête indique, pour chaque conteneur nommé, quelle fraction du CPU physique il consomme en moyenne sur les 5 dernières minutes. Multiplier par 100 donne un pourcentage.
 
 ---
 
 ## 🏗️ Structure du projet
-
+ 
 ```
 tp-integration/
-├── docker-compose.yml                  # Orchestration complète de la stack (6 services)
-├── .env                                # Variables d'environnement (non committé)
-├── .env.example                        # Modèle de configuration à copier
-├── .gitignore                          # Fichiers exclus du dépôt Git
-├── README.md                           # Documentation (ce fichier)
+├── docker-compose.yml                      # Orchestration des 6 services
+├── .env                                    # Variables sensibles (non committé)
+├── .env.example                            # Modèle de configuration
+├── .gitignore                              # Exclusions Git
+├── README.md                               # Ce fichier
+├── seed-data.sh                            # Script d'injection des données de test
 ├── glpi/
-│   └── config_db.php                   # Préconfiguration connexion GLPI → MariaDB
+│   ├── Dockerfile                          # Image custom GLPI + pdo_pgsql (tentative PostgreSQL)
+│   └── config_db.php                       # Configuration connexion GLPI → MariaDB
+├── mariadb/
+│   └── init.sql                            # Données initiales (tickets, équipements)
 ├── prometheus/
-│   └── prometheus.yml                  # Configuration des scrapers Prometheus
+│   └── prometheus.yml                      # Scrape configs (prometheus, cadvisor, glpi)
 ├── grafana/
 │   ├── provisioning/
 │   │   ├── datasources/
-│   │   │   ├── mariadb.yml             # Datasource GLPI-MariaDB (provisioning auto)
-│   │   │   └── prometheus.yml          # Datasource Prometheus (provisioning auto)
+│   │   │   ├── mariadb.yml                 # Datasource GLPI-MariaDB (auto-provisionnée)
+│   │   │   └── prometheus.yml             # Datasource Prometheus (auto-provisionnée)
 │   │   └── dashboards/
-│   │       └── dashboards.yml          # Provisioning automatique des dashboards
+│   │       └── dashboards.yml             # Provisioning automatique des dashboards
 │   └── dashboards/
-│       ├── glpi_dashboard.json         # Dashboard GLPI ITSM (6 panels)
-│       └── monitoring_dashboard.json   # Dashboard monitoring Docker/cAdvisor (4 panels)
+│       ├── glpi_dashboard.json            # Dashboard GLPI - 6 panels (tickets, SLA, priorités)
+│       └── monitoring_dashboard.json      # Dashboard monitoring - 4 panels (CPU, RAM, réseau)
 └── analyse/
-    └── analyse_bdd_glpi.md             # Analyse SQL de la BDD GLPI (Partie 2, Q1→Q5)
+    └── analyse_bdd_glpi.md                # Analyse SQL BDD GLPI - Q1 à Q5
 ```
+
 
 ---
 
@@ -288,4 +319,4 @@ tp-integration/
 
 ---
 
-*Rendu réalisé dans le cadre du TP Final d'Intégration Logicielle — M2 ISIE IBAM 2025-2026*
+*Rendu réalisé dans le cadre du TP Final d'Intégration Logicielle - M2 ISIE IBAM 2025-2026*

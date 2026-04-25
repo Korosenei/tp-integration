@@ -2,9 +2,9 @@
 **TP Final — Intégration Logicielle — M2 ISIE IBAM / UJKZ**
 
 **Groupe 6 :**
+- COULIBALY Abdoul Rachid
 - KOURAOGO W Joel Faïsal
 - PARE Kontama Léandre Bénilde
-- COULIBALY Abdoul Rachid
 
 ---
 
@@ -75,13 +75,13 @@ ORDER BY status;
 -- Tickets créés par mois sur les 12 derniers mois
 -- Note : GLPI stocke date_creation en timestamp Unix (entier)
 SELECT
-    DATE_FORMAT(FROM_UNIXTIME(date_creation), '%Y-%m') AS mois,
-    COUNT(*)                                            AS tickets_créés
+    DATE_FORMAT(date_creation, '%Y-%m') AS mois,
+    COUNT(*)                            AS tickets_créés
 FROM glpi_tickets
 WHERE
-    date_creation >= UNIX_TIMESTAMP(NOW() - INTERVAL 12 MONTH)
+    date_creation >= NOW() - INTERVAL 12 MONTH
     AND is_deleted = 0
-GROUP BY DATE_FORMAT(FROM_UNIXTIME(date_creation), '%Y-%m')
+GROUP BY DATE_FORMAT(date_creation, '%Y-%m')
 ORDER BY mois ASC;
 ```
 
